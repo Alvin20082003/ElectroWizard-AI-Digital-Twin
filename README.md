@@ -133,6 +133,9 @@ newveroxa/
 ### 3. AI Restoration Plan
 ![Restoration](assets/restoration.png)
 
+### 4. BESS Distribution Dashboard
+![BESS Dashboard](assets/bess_dashboard.png)
+
 ---
 
 ## 📄 License
