@@ -1,0 +1,149 @@
+/* Clean Modern Dashboard Theme (Light Mode) - Inspired by User Design */
+:root {
+  --bg-primary: #f3f4f6;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+
+  /* Brand Colors from Image */
+  --primary: #6C5DD3;
+  /* Vibrant Purple */
+  --secondary: #3B82F6;
+  /* Sky Blue */
+  --success: #2ecc71;
+  --warning: #FF9F43;
+  /* Orange Accent */
+  --error: #FF6B6B;
+  /* Pink/Red Accent */
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card & Paper Overrides */
+.MuiPaper-root {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: 16px !important;
+  /* Rounded cards like image */
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+p,
+span,
+div {
+  color: var(--text-primary);
+}
+
+/* Typography helper for secondary text */
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Navigation Tabs */
+.MuiTab-root {
+  color: var(--text-secondary) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: var(--primary) !important;
+}
+
+.MuiTabs-indicator {
+  background-color: var(--primary) !important;
+  height: 3px !important;
+  border-radius: 3px;
+}
+
+/* Inputs */
+.MuiOutlinedInput-root {
+  background-color: #f9fafb !important;
+  border-radius: 12px !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #e5e7eb !important;
+}
+
+/* Leaflet Map customization for light mode */
+.leaflet-container {
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Recharts overrides for light mode visibility */
+.recharts-text {
+  fill: #374151 !important;
+  font-size: 12px;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #e5e7eb;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Utility classes */
+.card-title {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.dashboard-header {
+  background: transparent;
+  box-shadow: none;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}

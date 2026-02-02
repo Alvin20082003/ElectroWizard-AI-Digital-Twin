@@ -1,0 +1,258 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, Paper, Grid, Card, CardContent, TextField, Button, CircularProgress, Alert } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { api } from '../services/api';
+
+const ExplainableAI = () => {
+    const [selectedZone, setSelectedZone] = useState(null);
+    const [explanation, setExplanation] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [zoneId, setZoneId] = useState('');
+    const [allZones, setAllZones] = useState([]);
+
+    const analyzeZone = useCallback(async (zone) => {
+        setLoading(true);
+        setSelectedZone(zone);
+
+        try {
+            const response = await api.getExplanation(zone);
+            setExplanation(response.data);
+        } catch (error) {
+            console.error('Error getting explanation:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const loadHighRiskZones = useCallback(async () => {
+        try {
+            const response = await api.getAllZones(100, 'Critical');
+            setAllZones(response.data.zones);
+            if (response.data.zones.length > 0) {
+                // Auto-select first critical zone
+                const firstZone = response.data.zones[0];
+                setZoneId(firstZone.zone_id);
+                analyzeZone(firstZone);
+            }
+        } catch (error) {
+            console.error('Error loading zones:', error);
+        }
+    }, [analyzeZone]);
+
+    useEffect(() => {
+        loadHighRiskZones();
+    }, [loadHighRiskZones]);
+
+    const handleAnalyzeClick = async () => {
+        if (!zoneId.trim()) {
+            alert('Please enter a Zone ID');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Fetch the specific zone from backend
+            const response = await api.getAllZones(1000);
+            const zone = response.data.zones.find(z => z.zone_id === zoneId.trim());
+
+            if (zone) {
+                await analyzeZone(zone);
+            } else {
+                alert(`Zone ID "${zoneId}" not found. Try: T_NAGAR_Z000`);
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error('Error finding zone:', error);
+            alert('Error loading zone. Make sure backend is running.');
+            setLoading(false);
+        }
+    };
+
+    const getColorForContribution = (value) => {
+        return value > 0 ? '#ff4444' : '#44ff44';
+    };
+
+    return (
+        <Box sx={{ height: '100%', p: 2, overflow: 'auto' }}>
+            <Typography variant="h5" gutterBottom sx={{ color: '#fff', fontWeight: 600, mb: 2 }}>
+                🧠 Feature 2: Explainable AI - Why This Zone is Flagged
+            </Typography>
+
+            {/* Zone Selection */}
+            <Paper sx={{ p: 3, mb: 3, bgcolor: '#151b3d', border: '1px solid #2a3b55' }}>
+                <Typography variant="subtitle2" sx={{ color: '#94a3b8', mb: 2, textTransform: 'uppercase', letterSpacing: 1 }}>
+                    🔍 Zone Analysis
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+                    <TextField
+                        label="Enter Zone ID to Analyze"
+                        value={zoneId}
+                        onChange={(e) => setZoneId(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAnalyzeClick()}
+                        variant="outlined"
+                        fullWidth
+                        placeholder="e.g., NUNGAMBAKKAM_Z000"
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                backgroundColor: '#0a0e17',
+                                color: '#fff',
+                                fontSize: '16px',
+                                '& fieldset': { borderColor: '#2a3b55' },
+                                '&:hover fieldset': { borderColor: '#667eea' },
+                                '&.Mui-focused fieldset': { borderColor: '#667eea', borderWidth: 2 }
+                            },
+                            '& .MuiInputLabel-root': { color: '#94a3b8' },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#667eea' }
+                        }}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={handleAnalyzeClick}
+                        disabled={loading}
+                        sx={{
+                            background: loading ? '#334155' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            px: 5,
+                            py: 1.8,
+                            whiteSpace: 'nowrap',
+                            minWidth: '160px',
+                            fontSize: '15px',
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                background: loading ? '#334155' : 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)'
+                            }
+                        }}
+                    >
+                        {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : '🔍 ANALYZE ZONE'}
+                    </Button>
+                </Box>
+            </Paper>
+
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+                    <CircularProgress />
+                </Box>
+            ) : explanation && selectedZone ? (
+                <Grid container spacing={3}>
+                    {/* Zone Info Card */}
+                    <Grid item xs={12} md={4}>
+                        <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                            <CardContent>
+                                <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold', mb: 2 }}>
+                                    Zone Information
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#fff', mb: 1 }}>
+                                    <strong>Zone ID:</strong> {selectedZone.zone_id}
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#fff', mb: 1 }}>
+                                    <strong>District:</strong> {selectedZone.district}
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#fff', mb: 1 }}>
+                                    <strong>Risk Level:</strong> <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{selectedZone.risk_level}</span>
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#fff', mb: 2 }}>
+                                    <strong>Impact Score:</strong> {selectedZone.impact_score.toFixed(2)}
+                                </Typography>
+                                <Alert severity="warning" sx={{ mt: 2 }}>
+                                    Predicted Impact: <strong>{explanation.predicted_value.toFixed(2)}</strong>
+                                </Alert>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* Top Contributing Factors */}
+                    <Grid item xs={12} md={8}>
+                        <Paper sx={{ p: 3, background: '#1e293b', color: '#fff' }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold" sx={{ color: '#fff' }}>
+                                Top Contributing Factors
+                            </Typography>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={explanation.top_factors}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="feature" angle={-45} textAnchor="end" height={100} />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="contribution" name="SHAP Contribution" fill="#8884d8">
+                                        {explanation.top_factors.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={getColorForContribution(entry.contribution)} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Paper>
+                    </Grid>
+
+                    {/* Human-Readable Explanation */}
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 3, background: '#1e293b', color: '#fff' }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold" sx={{ mb: 2, color: '#fff' }}>
+                                📊 Detailed Explanation - Why This Zone is High Risk
+                            </Typography>
+                            <Box sx={{
+                                bgcolor: '#0f172a',
+                                p: 3,
+                                borderRadius: 2,
+                                border: '2px solid #334155',
+                                color: '#fff'
+                            }}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        whiteSpace: 'pre-line',
+                                        lineHeight: 1.8,
+                                        color: '#fff',
+                                        '& strong': { color: '#a5b4fc' }
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: explanation.explanation.replace(/\*\*/g, '') }}
+                                />
+                            </Box>
+                        </Paper>
+                    </Grid>
+
+                    {/* Feature Breakdown Table */}
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 3, background: '#1e293b', color: '#fff' }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold" sx={{ color: '#fff' }}>
+                                Complete Feature Breakdown
+                            </Typography>
+                            <Grid container spacing={2} sx={{ mt: 1 }}>
+                                {explanation.top_factors.map((factor, index) => (
+                                    <Grid item xs={12} sm={6} md={4} key={index}>
+                                        <Card sx={{
+                                            bgcolor: '#0f172a',
+                                            border: `2px solid ${factor.contribution > 0 ? '#ef4444' : '#10b981'}`
+                                        }}>
+                                            <CardContent>
+                                                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>
+                                                    {factor.feature}
+                                                </Typography>
+                                                <Typography variant="h6" fontWeight="bold" sx={{ color: '#fff' }}>
+                                                    Value: {factor.value}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        color: factor.contribution > 0 ? '#ef4444' : '#10b981',
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                >
+                                                    Impact: {factor.contribution > 0 ? '+' : ''}{factor.contribution.toFixed(3)}
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                </Grid>
+            ) : (
+                <Alert severity="info">
+                    Select a zone to see AI explanation of why it was flagged
+                </Alert>
+            )}
+        </Box>
+    );
+};
+
+export default ExplainableAI;
