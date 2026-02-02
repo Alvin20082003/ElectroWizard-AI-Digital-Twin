@@ -703,8 +703,10 @@ async def send_email(email: EmailRequest):
     import time
     
     # Credentials provided by user
-    SENDER_EMAIL = "alvinofficial646@gmail.com"
-    APP_PASSWORD = "gbdq fwjw cnas hnrn".replace(" ", "")
+    # Credentials (Use Environment Variables for Safety)
+    SENDER_EMAIL = os.getenv("EMAIL_USER", "alvinofficial646@gmail.com")
+    # NOTE: To use real email, set EMAIL_APP_PASSWORD environment variable
+    APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD", "mock_value_for_safety")
     
     print("\n" + "="*60)
     print(f"🚀 INITIATING REAL-TIME EMAIL BROADCAST ({email.priority})")
